@@ -1,0 +1,566 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Garage + Keys — Rebuilt Panels</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Inter:wght@500;700&family=Roboto+Mono:wght@700&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome (SRI OK) -->
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"/>
+
+  <style>
+    :root{
+      /* CoreX palette */
+      --accentA:#00D1F5;      /* cyan */
+      --accentB:#9FEF00;      /* lime */
+      --panel-bg: rgba(13,16,21,.94);
+      --panel-border: rgba(255,255,255,.06);
+      --card: #0b1016;
+      --hover:#121923;
+      --chip:#111926;
+      --chip-border:#203044;
+      --text:#eef3f8;
+      --text-d:#9aa6b2;
+      --shadow: 0 20px 60px rgba(0,0,0,.55);
+    }
+
+    *{box-sizing:border-box}
+    html,body{ margin:0; background:transparent; color:var(--text); font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu,sans-serif; user-select:none; }
+
+    /* ===================== GARAGE PANEL (LEFT) ===================== */
+    .garage-root{ position:absolute; left:min(1.6vw,18px); top:2vh; bottom:2vh; width: clamp(340px, 28vw, 460px); }
+    .panel{ height:100%; display:flex; flex-direction:column; overflow:hidden; background:var(--panel-bg); border:1px solid var(--panel-border); border-radius:18px; box-shadow:var(--shadow); backdrop-filter: blur(6px); }
+
+    .panel-header{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:14px 16px 10px; border-bottom:1px solid var(--panel-border); }
+    .title{ font:800 clamp(22px, 2.2vw, 28px)/1 Montserrat,Inter,sans-serif }
+    .subtitle{ color:var(--text-d); font-size:12px; margin-top:4px }
+    .close{ all:unset; width:34px; height:34px; display:grid; place-items:center; border-radius:10px; color:#c9d3df; cursor:pointer; transition:.15s ease }
+    .close:hover{ background:var(--hover); color:#fff }
+
+    .search{ display:flex; align-items:center; gap:10px; margin:12px 14px; padding:10px 12px; background:#0b121a; border:1px solid var(--panel-border); border-radius:12px; color:var(--text-d) }
+    .search input{ all:unset; flex:1; color:#eaf1ff; font-size:14px }
+
+    .vehicle-list{ flex:1; overflow:auto; padding:0 10px 14px; display:flex; flex-direction:column; gap:10px; overscroll-behavior:contain }
+
+    .card{ background:#0b1016; border:1px solid var(--panel-border); border-radius:14px; padding:10px; transition:background .12s ease, transform .08s ease, border-color .2s ease }
+    .card:hover{ background:var(--hover); transform:translateY(-1px); border-color:#243244 }
+    .card.open{ background:#0d141c; border-color:#2a3a52; box-shadow: 0 12px 32px rgba(0,0,0,.35) inset; }
+
+    .head{ display:flex; align-items:center; justify-content:space-between; gap:10px }
+    .left{ display:flex; align-items:center; gap:10px; min-width:0 }
+    .star{ width:26px; height:26px; display:grid; place-items:center; border-radius:8px; background:#0c131b; border:1px solid var(--chip-border); color:var(--accentA) }
+    .name{ display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:8px; background:#0f1722; border:1px solid #1c2a3a; font:800 13px/1 Montserrat,Inter,sans-serif; letter-spacing:.3px; color:#e9eef6; text-transform:uppercase; white-space:nowrap; max-width:240px; overflow:hidden; text-overflow:ellipsis; }
+    .badge{ display:inline-flex; align-items:center; gap:8px; padding:5px 10px; border-radius:999px; border:1px solid #183049; background:linear-gradient(180deg, rgba(0,209,245,.16), rgba(0,209,245,.08)); color:#d9f6ff; font-size:12px }
+    .badge i{ color:#9be7ff }
+
+    .body{ margin-top:10px; border:1px solid var(--panel-border); border-radius:12px; padding:12px; background:#0a1219 }
+    .grid{ display:grid; grid-template-columns: 1fr auto; gap:12px; align-items:center }
+
+    .stats{ display:flex; flex-direction:column; gap:12px }
+    .srow{ display:grid; grid-template-columns: 30px 1fr 52px; gap:12px; align-items:center; }
+
+    .ico{ width:28px; height:28px; border-radius:8px; background:#0b141e; border:1px solid #203044; display:flex; align-items:center; justify-content:center }
+    .ico i{ display:block; line-height:1; font-size:14px; color:#b6e8ff }
+
+    .bar{ height:14px; border-radius:999px; background:#0a1219; border:1px solid #203044; overflow:hidden; box-shadow:inset 0 1px 0 rgba(255,255,255,.05) }
+    .bar>i{ display:block; height:100%; width:35%; background:linear-gradient(90deg,var(--accentA),var(--accentB)) }
+    .pct{ min-width:52px; text-align:center; padding:6px 6px; border-radius:6px; background:#0d151e; border:1px solid #223041; color:#dbe7ff; font:800 12px/1 Inter,sans-serif }
+
+    .plate{ position: relative; width: clamp(110px, 11vw, 160px); aspect-ratio: 5 / 2; background: #0000 url("./icons/plate1.png") center / contain no-repeat; display:flex; align-items:center; justify-content:center; border-radius: 10px; transform: translateX(8px); }
+    .plate .num{ position: absolute; left: 50%; top: 52%; transform: translate(-50%, -50%); font-family: "Roboto Mono", ui-monospace, Menlo, monospace; font-weight: 800; letter-spacing: 1.6px; font-size: clamp(15px, 1.1vw, 18px); color: #1b2b3d; text-shadow: 0 1px 0 rgba(255,255,255,.45) }
+
+    .actions{ display:flex; align-items:center; gap:8px; justify-content:flex-end; flex-wrap:wrap }
+    .btn{ all:unset; cursor:pointer; font-weight:800; font-size:13px; border-radius:10px; padding:8px 14px; background:#182230; color:#eaf1ff; border:1px solid #243246; transition:.15s ease }
+    .btn:hover{ filter:brightness(1.08) }
+    .btn-eye{ width:38px; height:38px; display:grid; place-items:center; border-radius:10px; background:#0e1620; border:1px solid #213044; color:#d7e5ff }
+
+    @media (max-height: 700px){ .search{ margin:10px 12px } .plate{ transform: translateX(4px) } .pct{ min-width:46px; padding:5px 6px } .srow{ grid-template-columns: 28px 1fr 50px } }
+
+    /* ===================== KEYS OVERLAY (CENTER) — FULL REBUILD ===================== */
+    .keys-overlay{position:fixed;inset:0;background:rgba(10,12,16,.72);display:none;align-items:center;justify-content:center;padding:2vh 2vw}
+    .keys-panel{width:min(1100px,92vw);max-height:92vh;background:linear-gradient(180deg, rgba(9,12,17,.96), rgba(11,14,20,.96));border:1px solid rgba(255,255,255,.06);border-radius:20px;box-shadow:0 28px 80px rgba(0,0,0,.6);display:flex;flex-direction:column;overflow:hidden;backdrop-filter: blur(6px)}
+
+    .keys-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.06)}
+    .keys-title{display:flex;align-items:center;gap:12px;font-size:22px;font-weight:800}
+    .keys-title i{color:var(--accentA)}
+    .keys-sub{color:var(--text-d);font-size:12px;margin-top:2px}
+    .keys-actions{display:flex;align-items:center;gap:8px}
+    .keys-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid #243246;border-radius:999px;background:#0f1722;color:#cfe3ff;font-size:12px}
+
+    .keys-close{all:unset;cursor:pointer;width:34px;height:34px;display:grid;place-items:center;border-radius:10px;color:#cbd6e6}
+    .keys-close:hover{background:#121a25;color:#fff}
+
+    .keys-toolbar{display:flex;gap:10px;align-items:center;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.06)}
+    .keys-search{flex:1;display:flex;align-items:center;gap:10px;background:#0b121a;border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:10px 12px;color:#97a5b6}
+    .keys-search input{all:unset;flex:1;color:#eaf1ff}
+
+    .keys-select, .keys-btn{all:unset;cursor:pointer;border-radius:10px;padding:9px 14px;font-weight:800;font-size:13px;border:1px solid #243246;background:#121a25;color:#eaf1ff}
+    .keys-select:hover, .keys-btn:hover{filter:brightness(1.06)}
+    .keys-btn-grad{background:linear-gradient(180deg,var(--accentA),var(--accentB));color:#082a2a;border:0}
+
+    .keys-content{display:grid;grid-template-columns: 1.1fr .9fr;gap:14px;padding:14px;overflow:hidden}
+
+    /* --- Columns are grid containers so nothing gets hidden --- */
+    .keys-col{display:grid; grid-template-rows: auto 1fr auto; min-height:0; background:#0b1218;border:1px solid rgba(255,255,255,.06);border-radius:14px;overflow:hidden}
+    .keys-col-header{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.06)}
+    .keys-col-title{display:flex;align-items:center;gap:10px;font-weight:800}
+
+    .keys-list{min-height:0; max-height:100%; overflow:auto; padding-bottom:2px; overscroll-behavior:contain}
+
+    .keys-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.05)}
+    .keys-row:hover{background:#101823}
+
+    .keys-veh{display:flex;align-items:center;gap:12px;min-width:0}
+    .keys-plate{display:inline-flex;align-items:center;gap:8px;background:#0c131c;border:1px solid #223042;border-radius:10px;padding:7px 12px;font-weight:900;letter-spacing:1.4px;color:#d7f3ff;font-family:"Roboto Mono", ui-monospace, Menlo, monospace}
+    .keys-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:800}
+    .keys-small{color:#9bb0c6;font-size:12px}
+
+    .keys-ract{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .state-pill{display:inline-flex;align-items:center;gap:6px;border:1px solid #223042;background:#0c141e;border-radius:999px;padding:4px 10px;color:#cfe3ff;font-size:12px}
+
+    /* --- Shares column: list never hides behind the form --- */
+    .keys-shares{min-height:0; max-height:100%; overflow:auto; padding-bottom:2px; overscroll-behavior:contain}
+    .keys-share-row{display:grid; grid-template-columns: minmax(0,1.1fr) minmax(300px,.9fr); align-items:center; gap:12px; padding:12px 14px; border-bottom:1px solid rgba(255,255,255,.05)}
+    .keys-share-row:hover{background:#101823}
+
+    .keys-who{min-width:0}
+    .keys-who .id{font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+
+    .keys-role{display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:flex-end}
+    .role-select{background:#0d1622;border:1px solid #253244;border-radius:10px;color:#eaf1ff;padding:8px 10px; min-width:160px}
+    .exp-pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;border:1px solid #263246;background:#0c141e;color:#cfe3ff;font-size:12px; white-space:nowrap}
+    .exp-pill .dot{width:8px;height:8px;border-radius:50%;background:var(--accentA);box-shadow:0 0 10px rgba(0,209,245,.55)}
+
+    .keys-form{display:grid;grid-template-columns: 1fr .6fr .6fr auto;gap:10px;padding:12px;border-top:1px solid rgba(255,255,255,.06);background:#0d141c}
+    .keys-field{display:flex;flex-direction:column;gap:6px}
+    .keys-field label{color:#9fb3c9;font-size:12px}
+    .keys-input,.keys-select{background:#0d1622;border:1px solid #253244;border-radius:10px;color:#eaf1ff;padding:9px 10px}
+
+    .keys-empty{padding:16px;color:#97a5b6}
+
+    .keys-toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#0f1722;border:1px solid #243042;border-radius:12px;color:#dbe8ff;padding:10px 14px;box-shadow:0 10px 40px rgba(0,0,0,.45);display:none}
+    .keys-toast.show{display:block}
+
+    @media (max-width: 1100px){
+      .keys-content{grid-template-columns: 1fr}
+      .keys-share-row{grid-template-columns: 1fr}
+      .keys-role{justify-content:flex-start}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===================== GARAGE ===================== -->
+  <div id="app" class="garage-root" style="display:none;">
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <div class="title">Garage</div>
+          <div class="subtitle">Manage, preview & track your vehicles</div>
+        </div>
+        <button id="btnClose" class="close" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="search" title="Search by name or plate (Ctrl+F)">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input id="search" type="text" placeholder="Search for Vehicle" autocomplete="off">
+      </div>
+
+      <div id="vehicleList" class="vehicle-list"></div>
+    </div>
+  </div>
+
+  <!-- ===================== KEYS OVERLAY ===================== -->
+  <div id="keysOverlay" class="keys-overlay" role="dialog" aria-modal="true" aria-labelledby="keysTitle">
+    <div class="keys-panel">
+      <div class="keys-head">
+        <div>
+          <div id="keysTitle" class="keys-title"><i class="fa-solid fa-key"></i> Vehicle Keys</div>
+          <div class="keys-sub">Share, update roles, and manage expiries</div>
+        </div>
+        <div class="keys-actions">
+          <span class="keys-chip"><i class="fa-solid fa-shield-keyhole"></i> Secure Share</span>
+          <button class="keys-close" id="keysClose" aria-label="Close keys"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+      </div>
+
+      <div class="keys-toolbar">
+        <div class="keys-search">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input id="keysQ" placeholder="Search by vehicle, plate or garage...">
+        </div>
+        <select id="keysFilterState" class="keys-select" title="Filter by state">
+          <option value="">All states</option>
+          <option value="OUT">Out</option>
+          <option value="GARAGED">Garaged</option>
+          <option value="IMPOUND">Impound</option>
+        </select>
+        <select id="keysSort" class="keys-select" title="Sort list">
+          <option value="garage">Garage A→Z</option>
+          <option value="state">State</option>
+          <option value="fuel">Fuel</option>
+          <option value="engine">Engine</option>
+        </select>
+        <button class="keys-btn" id="keysRefresh" title="Refresh"><i class="fa-solid fa-rotate-right"></i>&nbsp;Refresh</button>
+      </div>
+
+      <div class="keys-content">
+        <!-- Vehicles -->
+        <div class="keys-col">
+          <div class="keys-col-header">
+            <div class="keys-col-title"><i class="fa-solid fa-car"></i> My Vehicles</div>
+            <div id="keysCount" class="keys-small">—</div>
+          </div>
+          <div id="keysVehList" class="keys-list"></div>
+          <!-- empty grid third row for symmetry -->
+          <div style="display:none"></div>
+        </div>
+
+        <!-- Shares -->
+        <div class="keys-col">
+          <div class="keys-col-header">
+            <div class="keys-col-title">
+              <i class="fa-solid fa-users-gear"></i>
+              <span>Shares</span>
+              <span class="keys-small">for plate:</span>
+              <span id="keysSelPlate" class="keys-plate" style="margin-inline-start:6px">—</span>
+            </div>
+            <div id="keysSharesCount" class="keys-small">—</div>
+          </div>
+
+          <div id="keysShareList" class="keys-shares"></div>
+
+          <!-- form (grid last row; always visible; list scrolls above) -->
+          <div class="keys-form">
+            <div class="keys-field">
+              <label>Player (ID) or CitizenID</label>
+              <input id="keysTarget" class="keys-input" placeholder="e.g. 12 or QBC123...">
+            </div>
+            <div class="keys-field">
+              <label>Role</label>
+              <select id="keysRole" class="keys-select">
+                <option value="viewer">Viewer (track only)</option>
+                <option value="driver">Driver (take/park)</option>
+                <option value="manager">Manager (full)</option>
+              </select>
+            </div>
+            <div class="keys-field">
+              <label>Duration (hours) — optional</label>
+              <input id="keysHours" class="keys-input" type="number" min="0" placeholder="0 = no expiry">
+            </div>
+            <div class="keys-field" style="align-self:end">
+              <button id="keysShareBtn" class="keys-btn-grad" style="padding:10px 16px;border-radius:10px;"><i class="fa-solid fa-plus"></i> Share</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="keysToast" class="keys-toast"></div>
+
+  <script>
+    // ===================== Shared helpers =====================
+    const RES  = (typeof GetParentResourceName === 'function') ? GetParentResourceName() : 'qb-garages';
+    const post = (name, data={}) => fetch(`https://${RES}/${name}`, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data)});
+    const esc  = (s)=> (s??'').toString().replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[m]));
+    const pct  = (n)=> Math.max(0, Math.min(100, Math.round(Number(n||0))));
+
+    // Focus search with Ctrl+F inside panel
+    window.addEventListener('keydown',(e)=>{ if(e.ctrlKey && e.key.toLowerCase()==='f'){ const f=document.querySelector('.keys-overlay').style.display==='flex' ? document.getElementById('keysQ') : document.getElementById('search'); if(f){ e.preventDefault(); f.focus(); f.select?.(); }}});
+
+    // ===================== GARAGE UI =====================
+    function stateOf(v){
+      const raw = v && (v.stateKey ?? v.state);
+      if (typeof raw === 'number') return raw===1?'garaged':raw===2?'impound':'out';
+      const s = String(raw??'').toLowerCase();
+      if (s==='1'||s.includes('garag')) return 'garaged';
+      if (s==='2'||s.includes('imp'))   return 'impound';
+      if (s==='0'||s.includes('out'))   return 'out';
+      return 'garaged';
+    }
+
+    const badgePlace = t => `<span class="badge"><i class="fa-solid fa-location-dot"></i>${esc(t)}</span>`;
+
+    function headRow(v){
+      return `
+        <div class="head">
+          <div class="left">
+            <span class="star"><i class="fa-solid fa-car-rear"></i></span>
+            <span class="name">${esc((v.display||v.name||'').toUpperCase())}</span>
+          </div>
+          ${v.location ? badgePlace(v.location) : ''}
+        </div>`;
+    }
+
+    function statRow(iconCls, val){
+      val = pct(val);
+      return `
+        <div class="srow">
+          <span class="ico"><i class="${iconCls}" aria-hidden="true"></i></span>
+          <div class="bar"><i style="width:${val}%"></i></div>
+          <span class="pct">${val}</span>
+        </div>`;
+    }
+
+    function expanded(v){
+      const st = stateOf(v);
+      const take  = st==='garaged' ? `<button class="btn" data-act="take">Take Out</button>` : '';
+      const track = st==='out'     ? `<button class="btn" data-act="track">Track</button>` : '';
+      const depot = st==='impound' ? `<button class="btn" data-act="depot">Pay & Retrieve</button>` : '';
+
+      return `
+        <div class="body">
+          <div class="grid">
+            <div class="stats">
+              ${statRow('fa-solid fa-gas-pump', v.fuel)}
+              ${statRow('fa-solid fa-gauge-high', v.engine)}
+              ${statRow('fa-solid fa-car-side', v.body)}
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px;align-items:flex-end">
+              <div class="plate"><span class="num">${esc(v.plate||'PLATE')}</span></div>
+              <div class="actions">
+                ${take || track || depot}
+                <button class="btn-eye" data-eye data-model="${esc(v.model)}" data-plate="${esc(v.plate||'')}" title="Preview">
+                  <i class="fa-regular fa-eye"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function makeCard(v, open){
+      const el = document.createElement('div');
+      el.className = 'card'+(open?' open':'');
+      el.dataset.model = v.model || '';
+      el.innerHTML = headRow(v) + (open?expanded(v):'');
+
+      el.addEventListener('click',(e)=>{
+        if (e.target.closest('button')) return;
+        const list = document.getElementById('vehicleList');
+        list.querySelectorAll('.card.open').forEach(it=>{
+          if(it!==el){ if (it.__v && it.__v.plate) nui('nui:hover_preview',{on:false, plate: it.__v.plate}); it.classList.remove('open'); it.innerHTML = headRow(it.__v); }
+        });
+        if(el.classList.contains('open')){ el.classList.remove('open'); el.innerHTML = headRow(v); nui('nui:hover_preview',{on:false, plate: v.plate}); }
+        else { el.classList.add('open'); el.innerHTML = headRow(v) + expanded(v); bindActions(el, v); }
+      });
+
+      bindActions(el, v);
+      el.__v = v;
+      return el;
+    }
+
+    function bindActions(root, v){
+      root.querySelectorAll('[data-act]').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const a = btn.getAttribute('data-act');
+          if(a==='take')  post('nui:take_out',{plate:v.plate,model:v.model,info:v.raw});
+          if(a==='track') post('nui:track',{plate:v.plate});
+          if(a==='depot') post('nui:depot',{vehicle:v.raw});
+        });
+      });
+      const eye = root.querySelector('[data-eye]');
+      if(eye){
+        const model = eye.getAttribute('data-model');
+        const plate = eye.getAttribute('data-plate') || v.plate || '';
+        eye.addEventListener('mouseenter', ()=> nui('nui:hover_preview',{on:true, model, plate}));
+        eye.addEventListener('mouseleave', ()=> nui('nui:hover_preview',{on:false, plate}));
+      }
+    }
+
+    function render(list){
+      const host = document.getElementById('vehicleList');
+      host.innerHTML = '';
+      if(!list || list.length===0){ const d=document.createElement('div'); d.style.padding='12px'; d.style.color='var(--text-d)'; d.textContent='No vehicles found.'; host.appendChild(d); return; }
+      list.forEach((v,i)=> host.appendChild(makeCard(v, i===0)));
+    }
+
+    function nui(name,data={}){ return fetch(`https://${RES}/${name}`,{method:'POST',headers:{'Content-Type':'application/json; charset=UTF-8'},body:JSON.stringify(data)}); }
+
+    let state={vehicles:[]};
+    window.addEventListener('message',(e)=>{
+      const d=e.data||{};
+      if(d.action==='open'){
+        state={...state,...d.payload};
+        document.getElementById('app').style.display='block';
+        document.getElementById('search').value='';
+        render(state.vehicles);
+      }else if(d.action==='close'){
+        closeUI();
+      }else if(d.action==='update'){
+        state.vehicles=d.vehicles||state.vehicles; render(state.vehicles);
+      }else if(d.action==='keysui:open'){
+        keysOpen();
+      }
+    });
+
+    function closeUI(){ document.getElementById('app').style.display='none'; nui('nui:hover_preview',{on:false}); post('nui:close',{}); }
+    document.getElementById('btnClose').addEventListener('click', closeUI);
+    document.addEventListener('keydown',(e)=>{ if(e.key==='Escape'){ if(keysIsOpen()) keysClose(); else closeUI(); } });
+
+    document.getElementById('search').addEventListener('input',(e)=>{
+      const q=e.target.value.trim().toLowerCase();
+      if(!q) return render(state.vehicles);
+      render(state.vehicles.filter(v => (v.name||'').toLowerCase().includes(q) || (v.display||'').toLowerCase().includes(q) || (v.plate||'').toLowerCase().includes(q)));
+    });
+
+    // ===================== KEYS UI (Rebuilt) =====================
+    const keysOverlay = document.getElementById('keysOverlay');
+    const keysToast   = document.getElementById('keysToast');
+    const postNUI     = (name, data={}) => fetch(`https://${RES}/${name}`, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data)});
+
+    const KEYS = { vehicles:[], shares:{}, selectedPlate:null, filtered:[], sort:'garage', filterState:'' };
+
+    function keysIsOpen(){ return keysOverlay.style.display === 'flex'; }
+    function keysOpen(){ keysOverlay.style.display = 'flex'; KEYS.selectedPlate = null; document.getElementById('keysSelPlate').textContent = '—'; document.getElementById('keysQ').value = ''; keysRefresh(); }
+    function keysClose(){ postNUI('keysui:close', {}).then(()=> keysOverlay.style.display='none'); }
+
+    document.getElementById('keysClose').addEventListener('click', keysClose);
+    document.getElementById('keysRefresh').addEventListener('click', keysRefresh);
+    document.getElementById('keysShareBtn').addEventListener('click', keysDoShare);
+    document.getElementById('keysQ').addEventListener('input', (e)=> keysFilter(e.target.value));
+    document.getElementById('keysSort').addEventListener('change', (e)=>{ KEYS.sort=e.target.value; keysRenderVehicles(); });
+    document.getElementById('keysFilterState').addEventListener('change', (e)=>{ KEYS.filterState=e.target.value; keysRenderVehicles(); });
+
+    function keysToastMsg(msg){ keysToast.textContent = msg; keysToast.classList.add('show'); setTimeout(()=> keysToast.classList.remove('show'), 1600); }
+
+    function keysFormatState(s){ if (s === 1 || s === '1') return 'GARAGED'; if (s === 2 || s === '2') return 'IMPOUND'; return 'OUT'; }
+    function keysPickName(v){ return (v.vehicle || v.model || '').toUpperCase(); }
+
+    async function keysRefresh(){
+      const data = await postNUI('keysui:fetch', {}).then(r=>r.json()).catch(()=>({vehicles:[],shares:{}}));
+      KEYS.vehicles = data.vehicles || [];
+      KEYS.shares   = data.shares   || {};
+      const total = (KEYS.vehicles||[]).length; document.getElementById('keysCount').textContent = total? `${total} vehicle${total>1?'s':''}` : '—';
+      if (KEYS.selectedPlate) { const still = KEYS.vehicles.some(v => (v.plate||'').toUpperCase() === KEYS.selectedPlate); if (!still) KEYS.selectedPlate = null; }
+      document.getElementById('keysSelPlate').textContent = KEYS.selectedPlate || '—';
+      keysFilter(document.getElementById('keysQ').value);
+      keysRenderShares();
+    }
+
+    function keysFilter(q){
+      q = (q||'').toLowerCase().trim();
+      const src = KEYS.vehicles||[];
+      KEYS.filtered = !q ? src.slice() : src.filter(v => (v.vehicle||'').toLowerCase().includes(q) || (v.plate||'').toLowerCase().includes(q) || (v.garage||'').toLowerCase().includes(q));
+      keysRenderVehicles();
+    }
+
+    function sorters(){
+      return {
+        garage:(a,b)=> String(a.garage||'').localeCompare(String(b.garage||'')) || String(a.plate||'').localeCompare(String(b.plate||'')),
+        state:(a,b)=> keysFormatState(a.state).localeCompare(keysFormatState(b.state)) || String(a.plate||'').localeCompare(String(b.plate||'')),
+        fuel:(a,b)=> (b.fuel||0)-(a.fuel||0),
+        engine:(a,b)=> (b.engine||0)-(a.engine||0),
+      }
+    }
+
+    function keysRenderVehicles(){
+      const host = document.getElementById('keysVehList');
+      host.innerHTML = '';
+      let list = KEYS.filtered.length ? KEYS.filtered.slice() : (KEYS.vehicles||[]).slice();
+      if (KEYS.filterState){ list = list.filter(v => keysFormatState(v.state) === KEYS.filterState); }
+      const srt = sorters()[KEYS.sort] || sorters().garage; list.sort(srt);
+      if(!list || !list.length){ host.innerHTML = '<div class="keys-empty">No vehicles.</div>'; document.getElementById('keysCount').textContent='0 vehicles'; return; }
+
+      document.getElementById('keysCount').textContent=`${list.length} vehicle${list.length>1?'s':''}`;
+
+      list.forEach(v=>{
+        const st = keysFormatState(v.state);
+        const row = document.createElement('div');
+        row.className = 'keys-row';
+        row.innerHTML = `
+          <div class="keys-veh">
+            <span class="keys-plate" title="Plate">${esc((v.plate||'').toUpperCase())}</span>
+            <div>
+              <div class="keys-name">${esc(keysPickName(v))}</div>
+              <div class="keys-small">${esc(st)} • Fuel ${Math.round(v.fuel||0)}% • Eng ${Math.round((v.engine||1000)/10)}%</div>
+            </div>
+          </div>
+          <div class="keys-ract">
+            <span class="state-pill"><i class="fa-solid fa-warehouse"></i> ${esc(v.garage || '—')}</span>
+            <button class="keys-btn" data-plate="${esc((v.plate||'').toUpperCase())}" title="Manage shares"><i class="fa-solid fa-gear"></i>&nbsp;Manage</button>
+          </div>`;
+        row.querySelector('button[data-plate]').addEventListener('click', ()=>{ KEYS.selectedPlate = (v.plate||'').toUpperCase(); document.getElementById('keysSelPlate').textContent = KEYS.selectedPlate; keysRenderShares(); });
+        host.appendChild(row);
+      });
+    }
+
+    function relTimeFrom(exp){
+      if(!exp) return 'no expiry';
+      const t = Date.parse(exp); if(Number.isNaN(t)) return exp; // keep raw
+      const diff = t - Date.now();
+      const abs = Math.abs(diff);
+      const h = Math.round(abs/3.6e6);
+      if(diff>0) return `in ${h}h`;
+      return `${h}h ago`;
+    }
+
+    function keysRenderShares(){
+      const host = document.getElementById('keysShareList');
+      host.innerHTML = '';
+      const plate = KEYS.selectedPlate;
+      if(!plate){ host.innerHTML = '<div class="keys-empty">Pick a vehicle from the left.</div>'; document.getElementById('keysSharesCount').textContent='—'; return; }
+      const list = KEYS.shares[plate] || [];
+      document.getElementById('keysSharesCount').textContent = list.length ? `${list.length} active` : '0 active';
+      if(!list.length){ host.innerHTML = '<div class="keys-empty">No active shares for this plate.</div>'; return; }
+
+      list.forEach(s=>{
+        const expText = s.expires_at ? relTimeFrom(s.expires_at) : 'no expiry';
+        const row = document.createElement('div');
+        row.className = 'keys-share-row';
+        row.innerHTML = `
+          <div class="keys-who">
+            <div class="id"><i class="fa-solid fa-user"></i> ${esc(s.shared_to_citizenid)}</div>
+            <div class="keys-small">${esc(expText)}</div>
+          </div>
+          <div class="keys-role">
+            <select class="role-select" data-act="role">
+              <option value="viewer" ${s.role==='viewer'?'selected':''}>Viewer</option>
+              <option value="driver" ${s.role==='driver'?'selected':''}>Driver</option>
+              <option value="manager" ${s.role==='manager'?'selected':''}>Manager</option>
+            </select>
+            <span class="exp-pill"><span class="dot"></span> ${esc(expText)}</span>
+            <button class="keys-btn" data-act="addh" title="Extend 24 hours">+ 24h</button>
+            <button class="keys-btn" data-act="revoke" style="border-color:#5b2530;background:#1a1214;color:#ffdadd" title="Revoke share"><i class="fa-solid fa-ban"></i> Revoke</button>
+          </div>`;
+
+        row.querySelector('[data-act="revoke"]').addEventListener('click', async ()=>{
+          if(!confirm('Revoke this share?')) return;
+          const r = await postNUI('keysui:revoke', { plate: plate, target: s.shared_to_citizenid }).then(r=>r.json()).catch(()=>({ok:false}));
+          if(r.ok){ keysToastMsg('Revoked'); keysRefresh(); } else { keysToastMsg('Revoke failed'); }
+        });
+        row.querySelector('[data-act="addh"]').addEventListener('click', async ()=>{
+          const r = await postNUI('keysui:update', { plate: plate, target: s.shared_to_citizenid, addHours: 24 }).then(r=>r.json()).catch(()=>({ok:false}));
+          if(r.ok){ keysToastMsg('+24h'); keysRefresh(); } else { keysToastMsg('Extend failed'); }
+        });
+        row.querySelector('[data-act="role"]').addEventListener('change', async (e)=>{
+          const role = e.target.value;
+          const r = await postNUI('keysui:update', { plate: plate, target: s.shared_to_citizenid, role }).then(r=>r.json()).catch(()=>({ok:false}));
+          if(r.ok){ keysToastMsg('Role updated'); keysRefresh(); } else { keysToastMsg('Update failed'); }
+        });
+
+        host.appendChild(row);
+      });
+    }
+
+    async function keysDoShare(){
+      if(!KEYS.selectedPlate){ keysToastMsg('Select a vehicle first'); return; }
+      const target = document.getElementById('keysTarget').value.trim();
+      const role   = document.getElementById('keysRole').value;
+      const hours  = Number(document.getElementById('keysHours').value || 0);
+      if(!target){ keysToastMsg('Enter target'); return; }
+      const r = await postNUI('keysui:share', { plate: KEYS.selectedPlate, target, role, hours }).then(r=>r.json()).catch(()=>({ok:false}));
+      if(r.ok){ keysToastMsg('Shared'); document.getElementById('keysTarget').value=''; document.getElementById('keysHours').value=''; keysRefresh(); }
+      else { keysToastMsg(r.err || 'Share failed'); }
+    }
+  </script>
+</body>
+</html>
